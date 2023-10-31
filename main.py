@@ -73,16 +73,19 @@ class MatrixGrid(GridLayout, BoxLayout):
 
 
 # // Our main App
-# // All the initiations, exchanges and processes done here
+# // Semua inisiasi, proses bakalan dilakuin di sini
 class MatrixCalculator(App):
 
     # Config_format === Operation_Type: (Input_type, Order_type, Output_type)
-    operation_config = {'Determinant': ('single', 'square', 'number'),
-                        'Rank': ('single', 'any', 'number'),
+    operation_config = {
                         'Addition': ('double', 'same', 'matrix'),
-                        'Product': ('double', 'chain', 'matrix'),
+                        'Subtract':('double', 'same', 'matrix'),
+                        'Determinan': ('single', 'square', 'number'),
                         'Inverse': ('single', 'square', 'matrix')}
-    operation_mode = OptionProperty('Determinant', options=operation_config.keys())
+                        # 'Rank': ('single', 'any', 'number'),
+                        # 'Transpose': ('single', 'any', 'matrix'),
+                        # 'Product': ('double', 'chain', 'matrix'),
+    operation_mode = OptionProperty('Determinan', options=operation_config.keys())
     error_list = ListProperty([])
     operation_type = OptionProperty('single', options=['single', 'double'])
 
@@ -167,19 +170,25 @@ class MatrixCalculator(App):
         answer_string = ""
         WHITE_SPACE = "     "
 
-        if self.operation_mode == "Determinant":
+        if self.operation_mode == "Determinan":
 
             determinant = Calculator().determinant(matrices_list[0])
             answer_string += f"Determinant:{WHITE_SPACE}[anchor='right']{determinant}"
 
-        elif self.operation_mode == "Rank":
-            rank = Calculator().rank_of_matrix(matrices_list[0])
-            answer_string += f"Rank:{WHITE_SPACE}{rank}"
+        # elif self.operation_mode == "Rank":
+        #     rank = Calculator().rank_of_matrix(matrices_list[0])
+        #     answer_string += f"Rank:{WHITE_SPACE}{rank}"
 
         elif self.operation_mode == "Addition":
             sum = Calculator().add(matrices_list[0], matrices_list[1])
-            answer_string += f"Sum:{WHITE_SPACE}"
+            answer_string += f"Addition:{WHITE_SPACE}"
             self.root.ids.output_matrix.show_matrix(sum)
+            self.root.ids.ans_button.trigger_action()
+
+        elif self.operation_mode == "Subtract":
+            subtract = Calculator().subtract(matrices_list[0], matrices_list[1])
+            answer_string += f"Subtract:{WHITE_SPACE}"
+            self.root.ids.output_matrix.show_matrix(subtract)
             self.root.ids.ans_button.trigger_action()
 
         elif self.operation_mode == "Product":
@@ -187,6 +196,10 @@ class MatrixCalculator(App):
             answer_string += f"Product:{WHITE_SPACE}"
             self.root.ids.output_matrix.show_matrix(product)
             self.root.ids.ans_button.trigger_action()
+
+        elif self.operation_mode == "Transpose":
+            transpose = Calculator().transpose(matrices_list[0])
+            answer_string += f"Tranpose: {WHITE_SPACE}{transpose}"
 
         elif self.operation_mode == "Inverse":
             determinant = Calculator().determinant(matrices_list[0])
@@ -312,13 +325,22 @@ class Calculator:
             return 1
 
     def add(self, A, B):
-        summed_matrix = [list(zip(m, n)) for m, n in zip(A, B)]
+        summed_matrix = [list(zip(m, n))for m, n in zip(A, B)]
         for j in range(0, len(summed_matrix)):
             for k in range(0, len(summed_matrix[j])):
                 pair = summed_matrix[j][k]
                 summed_matrix[j][k] = pair[0] + pair[1]
         print(summed_matrix)
         return summed_matrix
+    
+    def subtract(self, A, B):
+        reduce_matrix = [list(zip(m, n))for m, n in zip(A,B)]
+        for r in range(0, len(reduce_matrix)):
+            for k in range(0, len(reduce_matrix[r])):
+                pair = reduce_matrix[r][k]
+                reduce_matrix[r][k] = pair[0] - pair[1]
+        print(reduce_matrix)
+        return reduce_matrix
 
     def product(self, A, B):
         group_by_column = [[k[t] for k in B] for t in range(len(B[0]))]

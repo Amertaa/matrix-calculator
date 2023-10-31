@@ -138,7 +138,7 @@
                 text_size: self.size
                 font_size: sp(19)
                 font_name: './assets/fonts/BalooBhai2-Regular.ttf'
-                text: "Choose order of Matrix :"
+                text: "Set Your Ordo Matrix: "
                 color: utils.get_color_from_hex('#4E5356')
             
             # // Number stepper to adjust matrix order
@@ -235,17 +235,15 @@
                 spacing: [dp(10), dp(5)]
                 size_hint_x: 0.8788
                 
-                ToggleOperation:
-                    text: "Determinant"
-                    state: 'down'
-                ToggleOperation:
-                    text: "Rank"
+
                 ToggleOperation:
                     text: "Addition"
                 ToggleOperation:
-                    text: "Product"
+                    text: "Subtract"
                 ToggleOperation:
                     text: "Inverse"
+                ToggleOperation: 
+                    text: "Determinant"
 
 
 
@@ -357,7 +355,7 @@
             background_normal: ''
             background_color: 0,0,0,0
 
-            text: '  Reset'
+            text: 'Reset'
             font_name: 'Roboto-BoldItalic.ttf'
             font_size: sp(16.5)
 
