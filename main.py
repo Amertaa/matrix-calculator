@@ -78,19 +78,20 @@ class MatrixCalculator(App):
 
     # Config_format === Operation_Type: (Input_type, Order_type, Output_type)
     operation_config = {
-                        'Addition': ('double', 'same', 'matrix'),
-                        'Subtract':('double', 'same', 'matrix'),
-                        'Determinan': ('single', 'square', 'number'),
-                        'Inverse': ('single', 'square', 'matrix')}
-                        # 'Rank': ('single', 'any', 'number'),
-                        # 'Transpose': ('single', 'any', 'matrix'),
-                        # 'Product': ('double', 'chain', 'matrix'),
-    operation_mode = OptionProperty('Determinan', options=operation_config.keys())
+        'Tambah': ('double', 'same', 'matrix'),
+        'Kurang': ('double', 'same', 'matrix'),
+        'Determinan': ('single', 'square', 'number'),
+        'Pangkat': ('single', 'any', 'number'),
+        'Dot Product': ('double', 'chain', 'matrix'),
+        'Invers': ('single', 'square', 'matrix')}
+    # 'Transpose': ('single', 'any', 'matrix'),
+    operation_mode = OptionProperty(
+        'Determinan', options=operation_config.keys())
     error_list = ListProperty([])
     operation_type = OptionProperty('single', options=['single', 'double'])
 
     def __init__(self, **kwargs):
-        self.title = "Matrix Calculator"
+        self.title = "Matrix Calculator ITK"
         global app
         app = self
         super().__init__(**kwargs)
@@ -136,7 +137,8 @@ class MatrixCalculator(App):
             return "---"
         else:
             self.error_list = []
-            values_list = [Fraction(child.text).limit_denominator(999) for child in children_list]
+            values_list = [Fraction(child.text).limit_denominator(999)
+                           for child in children_list]
 
         # // Covert Linear List to Matrix-type Nested List
         values_list.reverse()
@@ -156,13 +158,15 @@ class MatrixCalculator(App):
     def calculate(self):
 
         order_type = self.operation_config[self.operation_mode][1]
-        improper_order = Validator().chk_order([self.root.ids.input_matrix_1.order, self.root.ids.input_matrix_2.order], order_type)
+        improper_order = Validator().chk_order(
+            [self.root.ids.input_matrix_1.order, self.root.ids.input_matrix_2.order], order_type)
         if improper_order:
             return
 
         matrices_list = [self.make_matrix(self.root.ids.input_matrix_1)]
         if self.operation_config[self.operation_mode][0] == 'double':
-            matrices_list.append(self.make_matrix(self.root.ids.input_matrix_2))
+            matrices_list.append(self.make_matrix(
+                self.root.ids.input_matrix_2))
 
         if "---" in matrices_list:
             return
@@ -171,35 +175,37 @@ class MatrixCalculator(App):
         WHITE_SPACE = "     "
 
         if self.operation_mode == "Determinan":
-
             determinant = Calculator().determinant(matrices_list[0])
-            answer_string += f"Determinant:{WHITE_SPACE}[anchor='right']{determinant}"
+            answer_string += f"Determinan:{WHITE_SPACE}[anchor='right']{determinant}"
 
         # elif self.operation_mode == "Rank":
         #     rank = Calculator().rank_of_matrix(matrices_list[0])
         #     answer_string += f"Rank:{WHITE_SPACE}{rank}"
 
-        elif self.operation_mode == "Addition":
+        elif self.operation_mode == "Tambah":
             sum = Calculator().add(matrices_list[0], matrices_list[1])
-            answer_string += f"Addition:{WHITE_SPACE}"
+            answer_string += f"Tambah:{WHITE_SPACE}"
             self.root.ids.output_matrix.show_matrix(sum)
             self.root.ids.ans_button.trigger_action()
 
-        elif self.operation_mode == "Subtract":
-            subtract = Calculator().subtract(matrices_list[0], matrices_list[1])
-            answer_string += f"Subtract:{WHITE_SPACE}"
+        elif self.operation_mode == "Kurang":
+            subtract = Calculator().subtract(
+                matrices_list[0], matrices_list[1])
+            answer_string += f"Kurang:{WHITE_SPACE}"
             self.root.ids.output_matrix.show_matrix(subtract)
             self.root.ids.ans_button.trigger_action()
 
-        elif self.operation_mode == "Product":
+        elif self.operation_mode == "Dot Product":
             product = Calculator().product(matrices_list[0], matrices_list[1])
-            answer_string += f"Product:{WHITE_SPACE}"
+            answer_string += f"Dot Product:{WHITE_SPACE}"
             self.root.ids.output_matrix.show_matrix(product)
             self.root.ids.ans_button.trigger_action()
 
         elif self.operation_mode == "Transpose":
             transpose = Calculator().transpose(matrices_list[0])
-            answer_string += f"Tranpose: {WHITE_SPACE}{transpose}"
+            answer_string += f"Tranpose:{WHITE_SPACE}"
+            self.root.ids.output_matrix.show_matrix(transpose)
+            self.root.ids.ans_button.trigger_action()
 
         elif self.operation_mode == "Inverse":
             determinant = Calculator().determinant(matrices_list[0])
@@ -222,7 +228,8 @@ class MatrixCalculator(App):
     def build(self):
         Window.clearcolor = (1, 1, 1, 1)
         if platform == "android":
-            Window.softinput_mode = 'below_target'  # // Added to fix text-box hidden behind keyboard
+            # // Added to fix text-box hidden behind keyboard
+            Window.softinput_mode = 'below_target'
             white_status_bar()
         else:
             Window.size = (450, 750)  # // Default size for desktop
@@ -238,15 +245,15 @@ class MainWindow(BoxLayout):
 class Calculator:
 
     def sub_matrix(self, A, order):
-        """Extracts mini matrices from single Big matrix
+        # """Extracts mini matrices from single Big matrix
 
-        Args:
-            A (List): Big matrix
-            order (int): Order of smaller matrices needed
+        # Args:
+        #     A (List): Big matrix
+        #     order (int): Order of smaller matrices needed
 
-        Returns:
-            List: List of mini matrices
-        """
+        # Returns:
+        #     List: List of mini matrices
+        # """
         minors = []
         for i in range(len(A) - order + 1):
             partial_minor = A[i: i + order]
@@ -299,7 +306,8 @@ class Calculator:
             inversed_matrix.append([])
             for j in range(len(A[1])):
                 minor_matrix = [k[:j] + k[j + 1:] for k in A_copy]
-                cofactor = ((-1) ** (i + j)) * self.determinant(minor_matrix) / det_A
+                cofactor = ((-1) ** (i + j)) * \
+                    self.determinant(minor_matrix) / det_A
                 inversed_matrix[i].append(cofactor)
                 print(f"Cofactor = {cofactor} for {minor_matrix}")
             else:
@@ -332,9 +340,9 @@ class Calculator:
                 summed_matrix[j][k] = pair[0] + pair[1]
         print(summed_matrix)
         return summed_matrix
-    
+
     def subtract(self, A, B):
-        reduce_matrix = [list(zip(m, n))for m, n in zip(A,B)]
+        reduce_matrix = [list(zip(m, n))for m, n in zip(A, B)]
         for r in range(0, len(reduce_matrix)):
             for k in range(0, len(reduce_matrix[r])):
                 pair = reduce_matrix[r][k]
@@ -396,7 +404,8 @@ class Validator:
         value = re.sub(r"\s", "", value)  # // Removes all types of whitespaces
         error = None
 
-        master_pattern = re.compile(r"^((\+|\-)?\d{1,3}(([\.]\d{1,2})|([\/]\d{1,3}))?){1}$")
+        master_pattern = re.compile(
+            r"^((\+|\-)?\d{1,3}(([\.]\d{1,2})|([\/]\d{1,3}))?){1}$")
 
         if not re.match(master_pattern, value):
             if value == '':
