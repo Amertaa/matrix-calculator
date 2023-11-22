@@ -1,34 +1,43 @@
-# All the import statements needed in current version or upcoming version
-import itertools
-import kivy
+# Import statement untuk modul dan pustaka yang diperlukan
+import itertools  # Mengimpor pustaka untuk alat iterasi
+import kivy  # Mengimpor pustaka Kivy untuk antarmuka pengguna grafis (GUI)
+# Mengimpor properti tertentu dari Kivy
 from kivy.properties import ListProperty, OptionProperty
-import os
-import sys
+import os  # Mengimpor modul OS untuk interaksi dengan sistem operasi
+import sys  # Mengimpor modul sys untuk fungsi dan variabel spesifik sistem
+# Mengimpor fungsi resource_add_path dari sumber daya Kivy
 from kivy.resources import resource_add_path
+# Mengimpor kelas BoxLayout dari modul Kivy UIX
 from kivy.uix.boxlayout import BoxLayout
+# Mengimpor kelas GridLayout dari modul Kivy UIX
 from kivy.uix.gridlayout import GridLayout
+# Mengimpor kelas MatrixValue dari modul kustom uixwidgets
 from uixwidgets import MatrixValue
-from kivy.utils import platform
-from kivy.app import App
-from kivy.config import Config
+from kivy.utils import platform  # Mengimpor fungsi platform dari utilitas Kivy
+from kivy.app import App  # Mengimpor kelas App dari modul aplikasi Kivy
+from kivy.config import Config  # Mengimpor kelas Config dari modul konfigurasi Kivy
+# Mengimpor kelas Window dari modul jendela inti Kivy
 from kivy.core.window import Window
-import re
-from fractions import Fraction
+import re  # Mengimpor modul re untuk ekspresi reguler
+from fractions import Fraction  # Mengimpor kelas Fraction dari modul fractions
 
+# Spesifikasi versi Kivy yang dibutuhkan
 kivy.require('2.0.0')
 
-# // Search for resources in project root file (optional)
+# // Cari sumber daya dalam file root proyek (opsional)
 Config.write()
 kivy.resources.resource_add_path("./")
 
+# Fungsi untuk mengatur warna status bar menjadi putih pada Android (dengan catatan masalah potensial pada ROM yang dimodifikasi)
 
-# // Sets status bar color to white on android
-# // Currently, not working properly on modified ROMs like MIUI
+
 def white_status_bar():
+    # Impor modul Android yang diperlukan
     from android.runnable import run_on_ui_thread  # type: ignore
 
     @run_on_ui_thread
     def _white_status_bar():
+        # Impor kelas yang diperlukan dari SDK Android
         from jnius import autoclass
         WindowManager = autoclass('android.view.WindowManager$LayoutParams')
         Color = autoclass('android.graphics.Color')
@@ -39,52 +48,63 @@ def white_status_bar():
         window.setStatusBarColor(Color.WHITE)
     _white_status_bar()
 
+# Definisi kelas untuk grid layout yang berisi semua unit matriks
 
-# Development of grid layout that contains all the units of matrix
+
 class MatrixGrid(GridLayout, BoxLayout):
+    # Inisialisasi order sebagai ListProperty dengan nilai default [3, 3]
     order = ListProperty([3, 3])
 
-    # Function to make Matrix view as per the provided order
+    # Fungsi untuk membuat tampilan Matriks berdasarkan order yang diberikan
     def on_order(self, *args):
+        app.error_list = []  # Inisialisasi error_list di aplikasi
 
-        app.error_list = []
-
-        self.clear_widgets()
+        self.clear_widgets()  # Hapus widget yang sudah ada dalam layout
+        # Tetapkan jumlah baris dalam layout berdasarkan order[0]
         self.rows = int(self.order[0])
+        # Tetapkan jumlah kolom dalam layout berdasarkan order[1]
         self.cols = int(self.order[1])
 
+        # Buat widget input teks untuk setiap unit matriks berdasarkan order
         for i in range(1, self.order[0] + 1):
             for k in range(1, self.order[1] + 1):
-                text_input = MatrixValue()
+                text_input = MatrixValue()  # Buat instansi kelas MatrixValue
+                # Tambahkan widget input teks ke dalam layout
                 self.add_widget(text_input)
 
+    # Fungsi untuk menampilkan matriks dalam layout MatrixGrid
     def show_matrix(self, matrix):
+        # Tetapkan order berdasarkan dimensi matriks
         self.order = [len(matrix), len(matrix[0])]
-        unpacked_matrix = list(itertools.chain(*matrix))
-        unpacked_matrix.reverse()
+        unpacked_matrix = list(itertools.chain(*matrix))  # Flatten matriks
+        unpacked_matrix.reverse()  # Balik matriks yang sudah diflatten
 
+        # Tampilkan nilai-nilai matriks dalam widget input teks yang sesuai
         for k in range(0, len(unpacked_matrix)):
+            # Tetapkan widget input teks sebagai hanya baca
             self.children[k].readonly = True
+            # Tetapkan nilai teks dalam widget
             self.children[k].text = str(unpacked_matrix[k])
 
+    # Metode konstruktor untuk MatrixGrid
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        # Panggil fungsi on_order untuk menginisialisasi layout berdasarkan order default
         self.on_order()
 
-
-# // Our main App
+# // Aplikasi Utama
 # // Semua inisiasi, proses bakalan dilakuin di sini
-class MatrixCalculator(App):
 
+
+class MatrixCalculator(App):
     # Config_format === Operation_Type: (Input_type, Order_type, Output_type)
     operation_config = {
         'Tambah': ('double', 'same', 'matrix'),
         'Kurang': ('double', 'same', 'matrix'),
         'Determinan': ('single', 'square', 'number'),
-        'Pangkat': ('single', 'any', 'number'),
-        'Dot Product': ('double', 'chain', 'matrix'),
+        'Rank': ('single', 'any', 'number'),
+        'Dot Produk': ('double', 'chain', 'matrix'),
         'Invers': ('single', 'square', 'matrix')}
-    # 'Transpose': ('single', 'any', 'matrix'),
     operation_mode = OptionProperty(
         'Determinan', options=operation_config.keys())
     error_list = ListProperty([])
@@ -178,16 +198,15 @@ class MatrixCalculator(App):
             determinant = Calculator().determinant(matrices_list[0])
             answer_string += f"Determinan:{WHITE_SPACE}[anchor='right']{determinant}"
 
-        # elif self.operation_mode == "Rank":
-        #     rank = Calculator().rank_of_matrix(matrices_list[0])
-        #     answer_string += f"Rank:{WHITE_SPACE}{rank}"
-
         elif self.operation_mode == "Tambah":
             sum = Calculator().add(matrices_list[0], matrices_list[1])
             answer_string += f"Tambah:{WHITE_SPACE}"
             self.root.ids.output_matrix.show_matrix(sum)
             self.root.ids.ans_button.trigger_action()
-
+            # transpose = Calculator().transpose(sum)
+            # self.root.ids.transpose_button.show_matrix(transpose)
+            # self.root.ids.transpose_matrix.show_matrix(transpose)
+            # self.root.ids.transpose_button.trigger_action(transpose)v
         elif self.operation_mode == "Kurang":
             subtract = Calculator().subtract(
                 matrices_list[0], matrices_list[1])
@@ -195,23 +214,21 @@ class MatrixCalculator(App):
             self.root.ids.output_matrix.show_matrix(subtract)
             self.root.ids.ans_button.trigger_action()
 
-        elif self.operation_mode == "Dot Product":
+        elif self.operation_mode == "Rank":
+            rank = Calculator().rank_of_matrix(matrices_list[0])
+            answer_string += f"Rank:{WHITE_SPACE}{rank}"
+
+        elif self.operation_mode == "Dot":
             product = Calculator().product(matrices_list[0], matrices_list[1])
-            answer_string += f"Dot Product:{WHITE_SPACE}"
+            answer_string += f"Dot Produk:{WHITE_SPACE}"
             self.root.ids.output_matrix.show_matrix(product)
             self.root.ids.ans_button.trigger_action()
 
-        elif self.operation_mode == "Transpose":
-            transpose = Calculator().transpose(matrices_list[0])
-            answer_string += f"Tranpose:{WHITE_SPACE}"
-            self.root.ids.output_matrix.show_matrix(transpose)
-            self.root.ids.ans_button.trigger_action()
-
-        elif self.operation_mode == "Inverse":
+        elif self.operation_mode == "Invers":
             determinant = Calculator().determinant(matrices_list[0])
             if determinant == 0:
                 self.root.ids.display_box.text = ""
-                answer_string += "[size=19sp]Inverse not possible for matrix\nwhose determinant is 0.[/size]"
+                answer_string += "[size=19sp]Inverse tidak dapat dilakukan\njika determinan 0.[/size]"
             else:
                 inverse = Calculator().inverse(matrices_list[0])
                 answer_string += f"Inverse:{WHITE_SPACE}"
@@ -219,12 +236,11 @@ class MatrixCalculator(App):
                 self.root.ids.ans_button.trigger_action()
 
         else:
-            answer_string += "Choose operation & re-calculate"
+            answer_string += "Pilih operasi dan kalkulasi ulang"
 
         # // Sets the answer to display_box
-        self.root.ids.display_box.text = f"[size=29sp]{answer_string}[/size]"
+        self.root.ids.display_box.text = f"[size=20sp]{answer_string}[/size]"
 
-    # //// Sets the root of our window
     def build(self):
         Window.clearcolor = (1, 1, 1, 1)
         if platform == "android":
@@ -232,7 +248,7 @@ class MatrixCalculator(App):
             Window.softinput_mode = 'below_target'
             white_status_bar()
         else:
-            Window.size = (450, 750)  # // Default size for desktop
+            Window.size = (450, 800)  # // Default size for desktop
 
         return MainWindow()
 
@@ -245,15 +261,6 @@ class MainWindow(BoxLayout):
 class Calculator:
 
     def sub_matrix(self, A, order):
-        # """Extracts mini matrices from single Big matrix
-
-        # Args:
-        #     A (List): Big matrix
-        #     order (int): Order of smaller matrices needed
-
-        # Returns:
-        #     List: List of mini matrices
-        # """
         minors = []
         for i in range(len(A) - order + 1):
             partial_minor = A[i: i + order]
@@ -264,6 +271,7 @@ class Calculator:
 
     def transpose(self, A):
         transposed_matrix = [[k[t] for k in A] for t in range(len(A[0]))]
+        print(transposed_matrix)
         return transposed_matrix
 
     def determinant(self, A, total=0):
@@ -309,7 +317,7 @@ class Calculator:
                 cofactor = ((-1) ** (i + j)) * \
                     self.determinant(minor_matrix) / det_A
                 inversed_matrix[i].append(cofactor)
-                print(f"Cofactor = {cofactor} for {minor_matrix}")
+                print(f"Kofaktor = {cofactor} untuk {minor_matrix}")
             else:
                 A_copy = list(A)
         else:

@@ -16,7 +16,7 @@
     opacity: 0 if self.order == [0, 0] else 1
     canvas.before:
         Color:
-            rgba: utils.get_color_from_hex('#d3dde4')
+            rgba: utils.get_color_from_hex('#0067b3')
         RoundedRectangle:
             size: self.size
             pos: self.pos
@@ -138,7 +138,7 @@
                 text_size: self.size
                 font_size: sp(19)
                 font_name: './assets/fonts/BalooBhai2-Regular.ttf'
-                text: "Set Your Ordo Matrix: "
+                text: "Tentukan Matrix: "
                 color: utils.get_color_from_hex('#4E5356')
             
             # // Number stepper to adjust matrix order
@@ -201,7 +201,7 @@
                 Label:
                     size_hint_x: None
                     size: self.texture_size
-                    text: app.operation_mode + " of"
+                    text: app.operation_mode + " dari"
                     font_name: "Roboto-Bold.ttf"
                 ToggleMatrix:
                     id: M1_button
@@ -218,7 +218,7 @@
                     Label:
                         size_hint_x: None
                         size: self.texture_size
-                        text: "and"
+                        text: "dan"
                         font_name: "Roboto-Bold.ttf"
                     ToggleMatrix:
                         text: "M2"
@@ -243,11 +243,11 @@
                 ToggleOperation:
                     text: "Determinan"
                 ToggleOperation:
-                    text: "Pangkat"
+                    text: "Rank"
                 ToggleOperation: 
                     text: "Invers"
                 ToggleOperation:
-                    text: "Dot Product"
+                    text: "Dot Produk"
 
 
 
@@ -313,10 +313,7 @@
                 on_state: root.ids.matrix_screen.current = self.text if self.state == 'down' else root.ids.matrix_screen.current
                 on_state: root.ids.matrix_screen.transition.direction = 'up' if self.state == 'down' else 'down'
                 opacity: 0 if self.disabled == True else 1
-
-                
-            
-
+  
     # // Area : Matrix
     AnchorLayout:
         anchor_y: 'center'
@@ -339,6 +336,8 @@
                 name: 'Ans'
                 MatrixGridA:
                     id: output_matrix
+
+            
                     
     # // Area : Launchpad
     BoxLayout:
@@ -377,7 +376,7 @@
         # ////// Button to initiate the calculation of provided matrix
         Button:
             on_release: app.calculate()
-            text: '   Calculate  >>'
+            text: '   Kalkulasi  >>'
             font_name: './assets/fonts/ChakraPetch-SemiBoldItalic.ttf'
             font_size: sp(25)
 
